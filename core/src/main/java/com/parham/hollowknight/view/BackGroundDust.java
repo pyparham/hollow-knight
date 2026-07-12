@@ -46,22 +46,23 @@ public class BackGroundDust {
 
     private static class DustParticle {
         float x, y;
-        float speedY;
-        float wobbleSpeed, wobbleAmount;
+        float speedX;
+        float wobbleSpeed;
+        float wobbleAmount;
         float stateTime;
         float size;
         float maxAlpha;
         float alpha;
 
         public DustParticle() {
-            reset(true);
+            reset();
         }
 
-        public void reset(boolean randomY) {
+        public void reset() {
             this.x = MathUtils.random(0, 1920 * 5);
-            this.y = MathUtils.random(0, 1080 * 2);
+            this.y = MathUtils.random(0, 1080 * 3);
             this.size = MathUtils.random(4f, 12f);
-            this.speedY = MathUtils.random(10f, 40f);
+            this.speedX = MathUtils.random(5f, 20f);
             this.wobbleSpeed = MathUtils.random(0.5f, 2f);
             this.wobbleAmount = MathUtils.random(10f, 30f);
             this.maxAlpha = MathUtils.random(0.1f, 0.6f);
@@ -70,14 +71,10 @@ public class BackGroundDust {
 
         public void update(float delta) {
             stateTime += delta;
-            y += speedY * delta;
-            x += MathUtils.sin(stateTime * wobbleSpeed) * wobbleAmount * delta;
-
+            y += MathUtils.sin(stateTime * wobbleSpeed) * wobbleAmount * delta;
+            x += speedX * delta;
             alpha = maxAlpha * (0.5f + 0.5f * MathUtils.sin(stateTime * 1.5f));
-//
-//            if (y > 1100) {
-//                reset(false);
-//            }
+            if (x > 1920 * 5) x = -50;
         }
     }
 

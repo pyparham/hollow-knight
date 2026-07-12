@@ -23,6 +23,7 @@ public class Main extends Game {
 
     public SpriteBatch batch;
     public AssetLoader assets;
+    public AssetLoader[] assetLoaders = new AssetLoader[4];
     public AudioManager audioManager;
     public TextureManager textureManager;
     public float globalDarkness = 0f;

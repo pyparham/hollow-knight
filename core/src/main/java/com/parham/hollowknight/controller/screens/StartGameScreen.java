@@ -34,6 +34,7 @@ public class StartGameScreen extends BaseScreen {
     private MenuPointerManager pointerManager;
     private TextButton backButton;
 
+
     BackGroundDust menuDust = new BackGroundDust();
 
 
@@ -102,14 +103,24 @@ public class StartGameScreen extends BaseScreen {
             row.add(number).width(60).padRight(20);
 
             if (data != null) {
+
+                Image previewImage;
+
+                if (data.currentRoomId != null && data.currentRoomId.equals("greenPath"))
+                    previewImage = new Image(game.assets.prevGreen);
+                else
+                    previewImage = new Image(game.assets.prevCross);
+
                 Table infoCol = new Table();
                 infoCol.add(new Label(data.areaName, areaStyle)).left().row();
 
                 Table rightCol = new Table();
                 rightCol.add(new Label(data.getFormattedPlayTime(), timeStyle)).right();
 
-                row.add(infoCol).left().expandX();
-                row.add(rightCol).right().padRight(40).fillX();
+                row.add(infoCol).left().width(220);
+                row.add(previewImage).width(738).height(117).padRight(30).left();
+                row.add(rightCol).right().padRight(40).expandX().fillX();
+
 
                 row.addListener(new ClickListener() {
                     @Override

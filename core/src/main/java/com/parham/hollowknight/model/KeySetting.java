@@ -9,7 +9,7 @@ public class KeySetting {
     private int upKey = Input.Keys.W;
     private int downKey = Input.Keys.S;
     private int jumpKey = Input.Keys.SPACE;
-    private int attackKey =Input.Buttons.LEFT;
+    private int attackKey = Input.Buttons.LEFT;
     private int dashKey = Input.Keys.SHIFT_LEFT;
     private int focusKey = Input.Buttons.RIGHT;
     private int leftKey = Input.Keys.A;
@@ -17,7 +17,7 @@ public class KeySetting {
     private int quickMapKey = Input.Keys.M;
     private int superDashKey = Input.Keys.X;
     private int dreamNailKey = Input.Keys.N;
-    private int quickCastKey = Input.Keys.C;
+    private int castKey = Input.Keys.C;
     private int inventoryKey = Input.Keys.I;
 
     private KeySetting() {
@@ -40,7 +40,7 @@ public class KeySetting {
         quickMapKey = Input.Keys.M;
         superDashKey = Input.Keys.X;
         dreamNailKey = Input.Keys.N;
-        quickCastKey = Input.Keys.C;
+        castKey = Input.Keys.C;
         inventoryKey = Input.Keys.I;
     }
 
@@ -132,12 +132,12 @@ public class KeySetting {
         this.dreamNailKey = dreamNailKey;
     }
 
-    public int getQuickCastKey() {
-        return quickCastKey;
+    public int getCastKey() {
+        return castKey;
     }
 
-    public void setQuickCastKey(int quickCastKey) {
-        this.quickCastKey = quickCastKey;
+    public void setCastKey(int castKey) {
+        this.castKey = castKey;
     }
 
     public int getInventoryKey() {

@@ -14,7 +14,7 @@ public class Mossfly extends Enemy {
     private static final float H = 90;
 
     private static final float APPEAR_DURATION = 0.6f;
-    private static final float WAKE_UP_RANGE = 400;
+    private static final float WAKE_UP_RANGE = 250;
     private static final float CHASE_SPEED = 130f;
 
     private static final float TAKE_OFF_DURATION = 0.25f;
@@ -45,12 +45,12 @@ public class Mossfly extends Enemy {
     }
 
     @Override
-    public void takeDamage(int damage, boolean hitFromLeft) {
+    public void takeDamage(int damage, boolean hitFromLeft, boolean isSpell) {
         if (asleep || appearing) {
             asleep = false;
             appearing = false;
         }
-        super.takeDamage(damage, hitFromLeft);
+        super.takeDamage(damage, hitFromLeft, isSpell);
         if (currentHealth <= 0) usesGravity = true;
 
     }

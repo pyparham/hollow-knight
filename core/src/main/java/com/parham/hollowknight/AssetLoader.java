@@ -14,6 +14,9 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.parham.hollowknight.Constants.*;
 
 public class AssetLoader {
@@ -23,7 +26,14 @@ public class AssetLoader {
     public BitmapFont menuFont;
     public BitmapFont listFont;
     public Texture menuPointer;
+    public Texture prevCross;
+    public Texture prevGreen;
     public Texture menuBackground;
+    public Texture menuBackground1;
+    public Texture menuBackground2;
+    public Texture menuBackground3;
+    public Texture menuBackground4;
+    public List<Texture> menuBackgrounds = new ArrayList<>();
     public Texture menuLogo;
     public Cursor customCursor;
     public Texture settingsDivider;
@@ -33,10 +43,44 @@ public class AssetLoader {
     public Music backgroundMusic;
     public Music crossMusic;
     public Music greenPathMusic;
+    public Music bossfightMusic;
 
     public Sound clickSound;
     public Sound breakableHitSound;
     public Sound breakableDeathSound;
+
+    public Sound knightSlashSound;
+    public Sound deathSound;
+    public Sound hitSound;
+    public Sound foucusStartSound;
+    public Sound knightFocusSound;
+    public Sound focusEndSound;
+    public Sound soulOrbFullSound;
+    public Sound landSound;
+    public Sound walkSound;
+
+    public Sound jumpSound;
+    public Sound pogoSound;
+    public Sound dashSound;
+    public Sound enemyDeathSound;
+    public Sound knightHitSound;
+
+    public Sound falseKnightHitSound;
+    public Sound falseKnightDeathSound;
+    public Sound stunHitSound;
+    public Sound attackAnticipateSound;
+    public Sound attackLungeSound;
+    public Sound fkJumpSound;
+    public Sound fkPowerMaceSound;
+    public Sound fkLandSound;
+    public Sound fkRoll;
+
+    public Sound zote1;
+    public Sound zote2;
+    public Sound zote3;
+    public Sound zote4;
+    public Sound zote5;
+    public Sound zote6;
 
     public Texture focusStart;
     public Texture focusLoop;
@@ -114,6 +158,8 @@ public class AssetLoader {
     public Texture falsenightLand;
     public Texture falsenightRun;
     public Texture falsenightStunRecover;
+    public Texture falsenightRunAntic;
+    public Texture shockwave;
 
     public Texture zoteAttack;
     public Texture zoteFall;
@@ -130,6 +176,18 @@ public class AssetLoader {
 
     public Texture wallIdleFrame;
     public Texture wallShakeAnim;
+    public Texture bossDoor;
+
+    public Texture soulBall;
+    public Texture blast;
+
+    private static AssetLoader instance;
+
+    public static AssetLoader getInstance() {
+        if (instance == null)
+            instance = new AssetLoader();
+        return instance;
+    }
 
     public void queueSettings() {
         manager.load(Constants.SETTINGS_DIVIDER, Texture.class);
@@ -147,10 +205,44 @@ public class AssetLoader {
     public void queueMusic() {
         manager.load(MENU_MUSIC, Music.class);
         manager.load(OPTION_CLICK, Sound.class);
-        manager.load(BREAKABLE_HIT,  Sound.class);
-        manager.load(BREAKABLE_DEATH,  Sound.class);
+        manager.load(BREAKABLE_HIT, Sound.class);
+        manager.load(BREAKABLE_DEATH, Sound.class);
         manager.load(CROSS_ROADS, Music.class);
         manager.load(GREEN_PATH, Music.class);
+        manager.load(BOSS_FIGHT, Music.class);
+
+        manager.load(KNIGHT_SLASH, Sound.class);
+        manager.load(KNIGHT_DEATH, Sound.class);
+        manager.load(KNIGHT_FOCUS_START, Sound.class);
+        manager.load(KNIGHT_FOCUS, Sound.class);
+        manager.load(KNIGHT_FOCUS_END, Sound.class);
+        manager.load(ENEMY_HIT, Sound.class);
+        manager.load(KNIGHT_JUMP, Sound.class);
+        manager.load(KNIGHT_POGO, Sound.class);
+        manager.load(SOUL_ORB_FULL, Sound.class);
+        manager.load(KNIGHT_DASH, Sound.class);
+        manager.load(ENEMY_DEATH, Sound.class);
+        manager.load(KNIGHT_HIT, Sound.class);
+        manager.load(KNIGHT_LAND, Sound.class);
+        manager.load(KNIGHT_WALK_SOUND, Sound.class);
+
+        manager.load(FALSE_KNIGHT_HIT, Sound.class);
+        manager.load(FALSE_KNIGHT_DEATH, Sound.class);
+        manager.load(STUN_HIT, Sound.class);
+        manager.load(ATTACK_ANTICIPATE, Sound.class);
+        manager.load(ATTACK_LUNGE, Sound.class);
+        manager.load(FALSE_KNIGHT_JUMP, Sound.class);
+        manager.load(FALSE_KNIGHT_POWER_MACE, Sound.class);
+        manager.load(FALSE_KNIGHT_LAND, Sound.class);
+
+        manager.load(FK_ROLL, Sound.class);
+
+        manager.load(ZOTE1, Sound.class);
+        manager.load(ZOTE2, Sound.class);
+        manager.load(ZOTE3, Sound.class);
+        manager.load(ZOTE4, Sound.class);
+        manager.load(ZOTE5, Sound.class);
+        manager.load(ZOTE6, Sound.class);
     }
 
     public void finishMusic() {
@@ -158,8 +250,43 @@ public class AssetLoader {
         clickSound = manager.get(Constants.OPTION_CLICK, Sound.class);
         crossMusic = manager.get(CROSS_ROADS, Music.class);
         greenPathMusic = manager.get(GREEN_PATH, Music.class);
-        breakableHitSound = manager.get(BREAKABLE_HIT,  Sound.class);
-        breakableDeathSound = manager.get(BREAKABLE_DEATH,  Sound.class);
+        bossfightMusic = manager.get(BOSS_FIGHT, Music.class);
+
+        breakableHitSound = manager.get(BREAKABLE_HIT, Sound.class);
+        breakableDeathSound = manager.get(BREAKABLE_DEATH, Sound.class);
+
+        knightSlashSound = manager.get(KNIGHT_SLASH, Sound.class);
+        deathSound = manager.get(KNIGHT_DEATH, Sound.class);
+        foucusStartSound = manager.get(KNIGHT_FOCUS_START, Sound.class);
+        knightFocusSound = manager.get(KNIGHT_FOCUS, Sound.class);
+        focusEndSound = manager.get(KNIGHT_FOCUS_END, Sound.class);
+        soulOrbFullSound = manager.get(SOUL_ORB_FULL, Sound.class);
+        landSound = manager.get(KNIGHT_LAND, Sound.class);
+        walkSound = manager.get(KNIGHT_WALK_SOUND, Sound.class);
+
+        hitSound = manager.get(ENEMY_HIT, Sound.class);
+        jumpSound = manager.get(KNIGHT_JUMP, Sound.class);
+        pogoSound = manager.get(KNIGHT_POGO, Sound.class);
+        dashSound = manager.get(KNIGHT_DASH, Sound.class);
+        enemyDeathSound = manager.get(ENEMY_DEATH, Sound.class);
+        knightHitSound = manager.get(KNIGHT_HIT, Sound.class);
+
+        falseKnightHitSound = manager.get(FALSE_KNIGHT_HIT, Sound.class);
+        falseKnightDeathSound = manager.get(FALSE_KNIGHT_DEATH, Sound.class);
+        stunHitSound = manager.get(STUN_HIT, Sound.class);
+        attackAnticipateSound = manager.get(ATTACK_ANTICIPATE, Sound.class);
+        attackLungeSound = manager.get(ATTACK_LUNGE, Sound.class);
+        fkJumpSound = manager.get(FALSE_KNIGHT_JUMP, Sound.class);
+        fkLandSound = manager.get(FALSE_KNIGHT_LAND, Sound.class);
+        fkPowerMaceSound = manager.get(FALSE_KNIGHT_POWER_MACE, Sound.class);
+        fkRoll = manager.get(FK_ROLL, Sound.class);
+
+        zote1 = manager.get(ZOTE1, Sound.class);
+        zote2 = manager.get(ZOTE2, Sound.class);
+        zote3 = manager.get(ZOTE3, Sound.class);
+        zote4 = manager.get(ZOTE4, Sound.class);
+        zote5 = manager.get(ZOTE5, Sound.class);
+        zote6 = manager.get(ZOTE6, Sound.class);
 
     }
 
@@ -175,9 +302,14 @@ public class AssetLoader {
 
     public void queueMainMenu() {
         manager.load(MENU_BG, Texture.class);
+        manager.load(MENU_BG2, Texture.class);
+        manager.load(MENU_BG3, Texture.class);
+        manager.load(MENU_BG4, Texture.class);
         manager.load(MENU_LOGO, Texture.class);
         manager.load(MENU_POINTER, Texture.class);
         manager.load(CURSOR, Pixmap.class);
+        manager.load(PREV_CROSS, Texture.class);
+        manager.load(PREV_GREEN, Texture.class);
         queueSettings();
         queueKnight();
         queueSoulOrb();
@@ -185,9 +317,19 @@ public class AssetLoader {
     }
 
     public void finishMainMenu() {
-        menuBackground = manager.get(Constants.MENU_BG, Texture.class);
+        menuBackground1 = manager.get(Constants.MENU_BG, Texture.class);
+        menuBackground2 = manager.get(Constants.MENU_BG2, Texture.class);
+        menuBackground3 = manager.get(Constants.MENU_BG3, Texture.class);
+        menuBackground4 = manager.get(Constants.MENU_BG4, Texture.class);
+        menuBackground = menuBackground1;
+        menuBackgrounds.add(menuBackground1);
+        menuBackgrounds.add(menuBackground2);
+        menuBackgrounds.add(menuBackground3);
+        menuBackgrounds.add(menuBackground4);
         menuLogo = manager.get(Constants.MENU_LOGO, Texture.class);
         menuPointer = manager.get(MENU_POINTER, Texture.class);
+        prevCross = manager.get(PREV_CROSS, Texture.class);
+        prevGreen = manager.get(PREV_GREEN, Texture.class);
         finishSettings();
         finishKnight();
         finishSoulOrb();
@@ -255,6 +397,9 @@ public class AssetLoader {
         manager.load(Constants.ATTACK, Texture.class);
         manager.load(Constants.HIT, Texture.class);
 
+        manager.load(SOUL_BALL, Texture.class);
+        manager.load(BLAST, Texture.class);
+
         manager.setLoader(TiledMap.class, new TmxMapLoader());
         manager.load(CROSS_ROADS_MAP, TiledMap.class);
         manager.load(BOSS_ROOM_MAP, TiledMap.class);
@@ -262,6 +407,7 @@ public class AssetLoader {
         manager.load(GREEN_PATH_MAP, TiledMap.class);
         manager.load(BREAK_WALL, Texture.class);
         manager.load(SHAKE_WALL, Texture.class);
+        manager.load(BOSS_DOOR, Texture.class);
 
         manager.load(Constants.WALL_SLIDE, Texture.class);
         manager.load(Constants.WALL_JUMP, Texture.class);
@@ -295,6 +441,9 @@ public class AssetLoader {
         knightAttack = manager.get(Constants.ATTACK, Texture.class);
         knightHit = manager.get(Constants.HIT, Texture.class);
 
+        soulBall = manager.get(Constants.SOUL_BALL, Texture.class);
+        blast = manager.get(Constants.BLAST, Texture.class);
+
         crossroadsMap = manager.get(CROSS_ROADS_MAP, TiledMap.class);
         bossfightRoom = manager.get(BOSS_ROOM_MAP, TiledMap.class);
         zootRoom = manager.get(ZOTE_ROOM_MAP, TiledMap.class);
@@ -302,6 +451,7 @@ public class AssetLoader {
 
         wallIdleFrame = manager.get(BREAK_WALL, Texture.class);
         wallShakeAnim = manager.get(SHAKE_WALL, Texture.class);
+        bossDoor = manager.get(BOSS_DOOR, Texture.class);
 
         wallSlide = manager.get(Constants.WALL_SLIDE, Texture.class);
         wallJump = manager.get(Constants.WALL_JUMP, Texture.class);
@@ -377,6 +527,8 @@ public class AssetLoader {
         manager.load(FALSENIGHT_LAND, Texture.class);
         manager.load(FALSENIGHT_RUN, Texture.class);
         manager.load(FALSENIGHT_STUN_RECOVER, Texture.class);
+        manager.load(FALSENIGHT_RUN_ANTIC, Texture.class);
+        manager.load(SHOCK_WAVE, Texture.class);
 
         manager.load(ZOTE_ATTACK, Texture.class);
         manager.load(ZOTE_FALL, Texture.class);
@@ -431,6 +583,8 @@ public class AssetLoader {
         falsenightLand = manager.get(FALSENIGHT_LAND, Texture.class);
         falsenightRun = manager.get(FALSENIGHT_RUN, Texture.class);
         falsenightStunRecover = manager.get(FALSENIGHT_STUN_RECOVER, Texture.class);
+        falsenightRunAntic = manager.get(FALSENIGHT_RUN_ANTIC, Texture.class);
+        shockwave = manager.get(SHOCK_WAVE, Texture.class);
 
         zoteAttack = manager.get(ZOTE_ATTACK, Texture.class);
         zoteFall = manager.get(ZOTE_FALL, Texture.class);
@@ -440,4 +594,6 @@ public class AssetLoader {
         zoteTalk = manager.get(ZOTE_TALK, Texture.class);
         zoteTurn = manager.get(ZOTE_TURN, Texture.class);
     }
+
+
 }

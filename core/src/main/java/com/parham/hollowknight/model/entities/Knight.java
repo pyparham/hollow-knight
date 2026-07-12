@@ -2,8 +2,8 @@ package com.parham.hollowknight.model.entities;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.parham.hollowknight.controller.AudioManager;
 import com.parham.hollowknight.controller.screens.GameScreen;
-import com.parham.hollowknight.model.Spike;
 import com.parham.hollowknight.model.enums.AttackDirection;
 import com.parham.hollowknight.model.enums.KnightState;
 import com.parham.hollowknight.model.enums.PhysicsConstants;
@@ -21,8 +21,10 @@ public class Knight {
     public final Rectangle hitbox = new Rectangle();
     public static final float WIDTH = 60;
     public static final float HEIGHT = 120;
-    public static final int NAIL_DAMAGE = 11;
-    public static final float INVINCIBLE_TIMER = 1f;
+    public static final float FOCUS_START_TIMER = 0.25f;
+    public static final float FOCUS_END_TIMER = 0.15f;
+    public static final float FOCUS_DURATION_TIMER = 0.6f;
+    private static final float RUN_SOUND_DURATION = 2f;
 
     public final int maxHealth = 5;
     public int currentHealth = 5;
@@ -37,7 +39,6 @@ public class Knight {
 
 
     private Rectangle nailHitbox = null;
-    private static final float NAIL_RANGE = 80f;
 
     public final Vector2 lastSafePosition = new Vector2();
     private float safePositionTimer = 0f;
@@ -53,6 +54,13 @@ public class Knight {
     private float healCooldownTimer = 0f;
     private float landingTimer = 0f;
     private float invincibleTimer = 0f;
+    private float pogoSoundCooldownTimer = 0f;
+    private float spikeCollisionTimer = 0f;
+    private float foucusStartTimer = 0f;
+    private float foucusDurationTimer = 0f;
+    private float foucusEndTimer = 0f;
+    private float walkTimer = 0f;
+
 
     public boolean wantsLeft = false;
     public boolean wantsRight = false;
@@ -63,6 +71,7 @@ public class Knight {
     public boolean wantsHeal = false;
     public boolean wantsLookUp = false;
     public boolean wantsLookDown = false;
+    public boolean wantsCast = false;
 
     public float attackStateTime = 0f;
     public float dashStateTime = 0f;
@@ -73,8 +82,9 @@ public class Knight {
     private float attackCooldownTimer = 0f;
     public boolean needsRespawn = false;
 
-    private float standUpTimer = 0f;
-    public boolean isStandingUp = false;
+    private float blinkTimer = 0f;
+    private static final float BLINK_INTERVAL = 0.15f;
+    private boolean darkPhase = false;
 
     public boolean touchingWall = false;
     public boolean wallOnRight = false;
@@ -91,11 +101,7 @@ public class Knight {
 
     public void update(float delta, List<Rectangle> platforms, List<Spike> spikes) {
 
-        if (dashCooldownTimer > 0f) dashCooldownTimer -= delta;
-        if (attackCooldownTimer > 0f) attackCooldownTimer -= delta;
-        if (healCooldownTimer > 0f) healCooldownTimer -= delta;
-        if (wallJumpLockTimer > 0f) wallJumpLockTimer -= delta;
-        if (invincibleTimer > 0f) invincibleTimer -= delta;
+        handleTimers(delta);
 
         if (checkSpikeCollisions(spikes)) return;
 
@@ -110,42 +116,26 @@ public class Knight {
 
         if (wantsHeal && onGround && soul >= PhysicsConstants.HEAL_SOUL_COST - 1) {
             if ((currentState == KnightState.IDLE || currentState == KnightState.RUNNING) &&
-                healTimer == 0f && healCooldownTimer <= 0f)
+                healTimer == 0f && healCooldownTimer <= 0f) {
                 currentState = KnightState.HEALING;
+                if (foucusStartTimer <= 0 && foucusEndTimer <= 0 && foucusDurationTimer <= 0) {
+                    AudioManager.getInstance().playSound(gameScreen.getGame().assets.focusEndSound);
+                    foucusStartTimer = FOCUS_START_TIMER;
+                }
+            }
         }
 
         onGround = false;
+
         applyGravity(delta);
         moveX(delta);
         moveY(delta);
         resolveCollisions(platforms);
+
         updateFallState();
-
-        if (currentState != KnightState.ATTACKING &&
-            currentState != KnightState.DASHING &&
-            currentState != KnightState.HEALING &&
-            currentState != KnightState.HIT &&
-            currentState != KnightState.LANDING &&
-            currentState != KnightState.WALL_JUMPING) {
-
-            if (!onGround) {
-                if (touchingWall && vY < 0 && ((wallOnRight && wantsRight) || (!wallOnRight && wantsLeft))) {
-                    currentState = KnightState.WALL_SLIDING;
-                    vY = Math.max(vY, PhysicsConstants.WALL_SLIDE_SPEED);
-                } else if (currentState != KnightState.JUMPING && currentState != KnightState.DOUBLE_JUMPING)
-                    currentState = KnightState.FALLING;
-                else if (vY <= 0)
-                    currentState = KnightState.FALLING;
-            } else {
-                if (vX != 0f)
-                    currentState = KnightState.RUNNING;
-                else
-                    currentState = KnightState.IDLE;
-            }
-        }
+        changeCurrentState();
 
         updateSafePosition(delta);
-
         syncHitbox();
         clearFrameInputs();
     }
@@ -197,6 +187,7 @@ public class Knight {
                         currentState == KnightState.DOUBLE_JUMPING)) {
                         currentState = KnightState.LANDING;
                         landingTimer = LANDING_DURATION;
+                        AudioManager.getInstance().playSound(gameScreen.getGame().assets.landSound);
                     }
                     onGround = true;
                     hasDashedInAir = false;
@@ -204,6 +195,7 @@ public class Knight {
                 }
                 vY = 0f;
             }
+
             syncHitbox();
         }
     }
@@ -214,12 +206,19 @@ public class Knight {
         syncHitbox();
         for (Spike spike : spikes) {
 
+            if (nailHitbox != null && !isCurrentlyAttacking()) nailHitbox.setPosition(-10000, -10000);
             if (isCurrentlyAttacking() && attackDirection == AttackDirection.DOWN && nailHitbox != null) {
-                if (nailHitbox.overlaps(spike.hitbox)) {
+                if (nailHitbox.overlaps(spike.hitbox) && pogoSoundCooldownTimer <= 0f) {
                     applyNailRecoil();
+                    pogoSoundCooldownTimer = 0.3f;
                     return false;
                 }
             }
+            if (isCurrentlyAttacking() && nailHitbox != null && nailHitbox.overlaps(spike.hitbox) && spikeCollisionTimer <= 0) {
+                AudioManager.getInstance().playSound(gameScreen.getGame().assets.pogoSound);
+                spikeCollisionTimer = 0.3f;
+            }
+
 
             if (hitbox.overlaps(spike.hitbox)) {
 
@@ -245,18 +244,22 @@ public class Knight {
         if (currentState == KnightState.HIT || currentState == KnightState.DEAD) return;
         if (isInvincible()) return;
         currentHealth -= damage;
+        AudioManager.getInstance().playSound(gameScreen.getGame().assets.knightHitSound);
         gameScreen.triggerScreenShake(0.2f, 8f);
         if (currentHealth <= 0) {
             currentHealth = 0;
             currentState = KnightState.DEAD;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.deathSound);
+            gameScreen.getGame().currentGameData.deathCount++;
             vX = 0;
             vY = 0;
             return;
         }
         vX = hitFromRight ? -PhysicsConstants.KNOCKBACK_X : PhysicsConstants.KNOCKBACK_X;
         currentState = KnightState.HIT;
-        hitTimer = PhysicsConstants.HIT_DURATION;
-        invincibleTimer = INVINCIBLE_TIMER;
+        invincibleTimer = 1f;
+        blinkTimer = 0f;
+        darkPhase = true;
     }
 
     private void clearFrameInputs() {
@@ -334,7 +337,7 @@ public class Knight {
     }
 
     public int getNailDamage() {
-        return NAIL_DAMAGE;
+        return 11;
     }
 
     public Vector2 getPosition() {
@@ -354,11 +357,17 @@ public class Knight {
     }
 
     public void gainSoul(float amount) {
+        if (soul < MAX_SOUL && soul + amount >= MAX_SOUL)
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.soulOrbFullSound);
         soul = Math.min(MAX_SOUL, soul + amount);
     }
 
     private void handleLand(float delta, List<Rectangle> platforms) {
         if (Math.abs(this.vX) > 0.1f) {
+            if (currentState != KnightState.RUNNING) {
+                walkTimer = RUN_SOUND_DURATION;
+                AudioManager.getInstance().playSound(gameScreen.getGame().assets.walkSound);
+            }
             currentState = KnightState.RUNNING;
             return;
         }
@@ -370,9 +379,15 @@ public class Knight {
         resolveCollisions(platforms);
         syncHitbox();
 
-        if (landingTimer <= 0f)
+        if (landingTimer <= 0f) {
+            if (wantsLeft || wantsRight) {
+                if (currentState != KnightState.RUNNING) {
+                    walkTimer = RUN_SOUND_DURATION;
+                    AudioManager.getInstance().playSound(gameScreen.getGame().assets.walkSound);
+                }
+            }
             currentState = (wantsLeft || wantsRight) ? KnightState.RUNNING : KnightState.IDLE;
-
+        }
         clearFrameInputs();
     }
 
@@ -398,9 +413,15 @@ public class Knight {
         syncHitbox();
         if (attackTimer <= 0f) {
             attackStateTime = 0f;
-            if (onGround)
+            if (onGround) {
+                if (vX != 0f) {
+                    if (currentState != KnightState.RUNNING) {
+                        walkTimer = RUN_SOUND_DURATION;
+                        AudioManager.getInstance().playSound(gameScreen.getGame().assets.walkSound);
+                    }
+                }
                 currentState = (vX != 0f) ? KnightState.RUNNING : KnightState.IDLE;
-            else
+            } else
                 currentState = stateBeforeAttack;
         }
     }
@@ -422,15 +443,26 @@ public class Knight {
     private void handleHeal(float delta) {
         if (!wantsHeal || !onGround) {
             currentState = KnightState.IDLE;
+            AudioManager.getInstance().stopSound(gameScreen.getGame().assets.focusEndSound);
+            AudioManager.getInstance().stopSound(gameScreen.getGame().assets.knightFocusSound);
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.foucusStartSound);
             healTimer = 0;
         } else {
             healTimer += delta;
+            if (foucusStartTimer <= 0 && foucusDurationTimer <= 0 && foucusEndTimer <= 0) {
+                foucusDurationTimer = FOCUS_DURATION_TIMER;
+                AudioManager.getInstance().playSound(gameScreen.getGame().assets.knightFocusSound);
+            }
+
             if (healTimer >= 1f) {
                 currentState = KnightState.IDLE;
                 currentHealth = Math.min(maxHealth, currentHealth + 1);
                 healTimer = 0f;
                 healCooldownTimer = 1f;
                 gameScreen.triggerScreenShake(0.2f, 8f);
+                AudioManager.getInstance().stopSound(gameScreen.getGame().assets.knightFocusSound);
+                AudioManager.getInstance().playSound(gameScreen.getGame().assets.foucusStartSound);
+                foucusEndTimer = FOCUS_END_TIMER;
             }
             soul -= (delta / PhysicsConstants.HEAL_DURATION * PhysicsConstants.HEAL_SOUL_COST);
             if (soul < 0) soul = 0;
@@ -464,10 +496,6 @@ public class Knight {
                 handleAttack(delta, platforms);
                 return true;
             }
-            case STANDING_UP -> {
-                handleStandUp(delta, platforms);
-                return true;
-            }
         }
         return false;
     }
@@ -481,8 +509,7 @@ public class Knight {
         } else if (wantsRight) {
             vX = PhysicsConstants.MOVE_SPEED;
             facingRight = true;
-        } else
-            vX = 0f;
+        } else vX = 0f;
     }
 
 
@@ -491,6 +518,8 @@ public class Knight {
             vY = PhysicsConstants.JUMP_VELOCITY;
             onGround = false;
             currentState = KnightState.JUMPING;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.jumpSound);
+
         } else if (wantsJump && touchingWall) {
             vY = PhysicsConstants.JUMP_VELOCITY * 0.85f;
 
@@ -501,10 +530,14 @@ public class Knight {
             currentState = KnightState.WALL_JUMPING;
             touchingWall = false;
             hasDoubleJumped = false;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.jumpSound);
+
         } else if (wantsJump && !hasDoubleJumped) {
             vY = PhysicsConstants.JUMP_VELOCITY * 0.95f;
             currentState = KnightState.DOUBLE_JUMPING;
             hasDoubleJumped = true;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.jumpSound);
+
         }
 
         if (!holdingJump && vY > 0f) vY = 0f;
@@ -515,6 +548,7 @@ public class Knight {
         if (wantsDash && dashTimer <= 0f && dashCooldownTimer <= 0f && (onGround || !hasDashedInAir)) {
             currentState = KnightState.DASHING;
             dashTimer = PhysicsConstants.DASH_DURATION;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.dashSound);
             dashCooldownTimer = PhysicsConstants.DASH_DURATION + PhysicsConstants.DASH_COOLDOWN;
             dashStateTime = 0f;
             wantsDash = false;
@@ -531,6 +565,7 @@ public class Knight {
             stateBeforeAttack = currentState;
             currentState = KnightState.ATTACKING;
             attackTimer = PhysicsConstants.ATTACK_DURATION;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.knightSlashSound);
             attackCooldownTimer = PhysicsConstants.ATTACK_DURATION + PhysicsConstants.ATTACK_COOLDOWN;
             attackStateTime = 0f;
             wantsAttack = false;
@@ -544,28 +579,6 @@ public class Knight {
         return false;
     }
 
-    private void handleStandUp(float delta, List<Rectangle> platforms) {
-        standUpTimer -= delta;
-        vX = 0f;
-        applyGravity(delta);
-        moveY(delta);
-        resolveCollisions(platforms);
-        syncHitbox();
-
-        if (standUpTimer <= 0f) {
-            isStandingUp = false;
-            standUpTimer = 0f;
-            currentState = KnightState.IDLE;
-        }
-    }
-
-    public void startStandUp() {
-        currentState = KnightState.STANDING_UP;
-        standUpTimer = STAND_UP_DURATION;
-        isStandingUp = true;
-        vX = 0f;
-        vY = 0f;
-    }
 
     public void resetAllStates() {
         dashTimer = 0f;
@@ -575,6 +588,73 @@ public class Knight {
         attackTimer = 0f;
         wantsDash = false;
         holdingJump = false;
+        wantsCast = false;
+
+    }
+
+
+    private void handleTimers(float delta) {
+
+        if (dashCooldownTimer > 0f) dashCooldownTimer -= delta;
+        if (attackCooldownTimer > 0f) attackCooldownTimer -= delta;
+        if (healCooldownTimer > 0f) healCooldownTimer -= delta;
+        if (wallJumpLockTimer > 0f) wallJumpLockTimer -= delta;
+        if (pogoSoundCooldownTimer > 0f) pogoSoundCooldownTimer -= delta;
+        if (foucusDurationTimer > 0f) foucusDurationTimer -= delta;
+        if (foucusStartTimer > 0f) foucusStartTimer -= delta;
+        if (foucusEndTimer > 0f) foucusEndTimer -= delta;
+        if (spikeCollisionTimer > 0f) spikeCollisionTimer -= delta;
+        if (invincibleTimer > 0f) {
+            invincibleTimer -= delta;
+            blinkTimer += delta;
+            if (blinkTimer >= BLINK_INTERVAL) {
+                blinkTimer = 0f;
+                darkPhase = !darkPhase;
+            }
+        } else darkPhase = false;
+        if (walkTimer > 0f) walkTimer -= delta;
+        if (walkTimer <= 0 && currentState == KnightState.RUNNING) {
+            walkTimer = RUN_SOUND_DURATION;
+            AudioManager.getInstance().stopSound(gameScreen.getGame().assets.walkSound);
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.walkSound);
+        }
+        if (currentState != KnightState.RUNNING)
+            AudioManager.getInstance().stopSound(gameScreen.getGame().assets.walkSound);
+
+    }
+
+    private void changeCurrentState() {
+        if (currentState != KnightState.ATTACKING &&
+            currentState != KnightState.DASHING &&
+            currentState != KnightState.HEALING &&
+            currentState != KnightState.HIT &&
+            currentState != KnightState.LANDING &&
+            currentState != KnightState.WALL_JUMPING) {
+
+            if (!onGround) {
+                if (touchingWall && vY < 0 && ((wallOnRight && wantsRight) || (!wallOnRight && wantsLeft))) {
+                    currentState = KnightState.WALL_SLIDING;
+                    vY = Math.max(vY, PhysicsConstants.WALL_SLIDE_SPEED);
+                } else if (currentState != KnightState.JUMPING && currentState != KnightState.DOUBLE_JUMPING)
+                    currentState = KnightState.FALLING;
+                else if (vY <= 0)
+                    currentState = KnightState.FALLING;
+            } else {
+                if (vX != 0f) {
+                    if (currentState != KnightState.RUNNING) {
+                        walkTimer = RUN_SOUND_DURATION;
+                        AudioManager.getInstance().playSound(gameScreen.getGame().assets.walkSound);
+                    }
+                    currentState = KnightState.RUNNING;
+                } else {
+                    currentState = KnightState.IDLE;
+                }
+            }
+        }
+    }
+
+    public boolean isBlinking() {
+        return invincibleTimer > 0f && darkPhase;
     }
 
 }

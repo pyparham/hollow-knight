@@ -28,6 +28,7 @@ public class GameData {
 
     public int deathCount;
     public int enemiesKilled;
+    public boolean isFalseKnightDefeated = false;
 
     //static factory method
     public GameData() {
@@ -36,7 +37,7 @@ public class GameData {
     public static GameData createNew(int slotIndex) {
         GameData data = new GameData();
         data.slotIndex = slotIndex;
-        data.areaName = "Crossroad";
+        data.areaName = "crossroad";
         data.playTimeSeconds = 0;
         data.lastSavedTimestamp = System.currentTimeMillis();
         data.maxHealth = 5;
@@ -45,7 +46,7 @@ public class GameData {
         data.soulVessels = 0;
         data.soul = 0;
         data.isSecretWallDestroyed = false;
-        data.currentRoomId = "Crossroad";
+        data.currentRoomId = "crossroad";
         data.lastSpawnName = "startGame_spawn";
         data.playerX = 0;
         data.playerY = 0;

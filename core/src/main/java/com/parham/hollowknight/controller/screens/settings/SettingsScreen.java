@@ -31,6 +31,7 @@ public class SettingsScreen extends BaseScreen {
     private Runnable[] menuActions;
     private int selectedIndex = 0;
     private MenuPointerManager pointerManager;
+    private int menuBGIndex = 0;
 
     BackGroundDust menuDust = new BackGroundDust();
 
@@ -98,12 +99,13 @@ public class SettingsScreen extends BaseScreen {
 
         root.add(new Image(game.assets.settingsDivider)).width(600).height(45).padBottom(60).row();
 
-        String[] labels = {"Audio", "Video", "Keyboard", "Language", "Back"};
+        String[] labels = {"Audio", "Video", "Keyboard", "Language", "Change Background", "Back"};
         menuActions = new Runnable[]{
             () -> game.pushScreen(new AudioScreen(game)),
             () -> game.pushScreen(new TextureScreen(game)),
             () -> game.pushScreen(new KeyboardScreen(game)),
-            () -> { /* game.pushScreen(new ControllerScreen(game)); */ },
+            () -> { /* game.pushScreen(new LanguageScreen(game)); */ },
+            this::changeBackground,
             game::popScreen
         };
 
@@ -176,5 +178,10 @@ public class SettingsScreen extends BaseScreen {
     @Override
     public void dispose() {
         if (stage != null) stage.dispose();
+    }
+
+    private void changeBackground() {
+        game.assets.menuBackground = game.assets.menuBackgrounds.get(menuBGIndex);
+        menuBGIndex = (menuBGIndex + 1) % game.assets.menuBackgrounds.size();
     }
 }

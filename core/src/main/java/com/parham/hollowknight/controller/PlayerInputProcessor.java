@@ -2,8 +2,8 @@ package com.parham.hollowknight.controller;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
-import com.parham.hollowknight.model.entities.Knight;
 import com.parham.hollowknight.model.KeySetting;
+import com.parham.hollowknight.model.entities.Knight;
 
 public class PlayerInputProcessor implements InputProcessor {
 
@@ -35,6 +35,7 @@ public class PlayerInputProcessor implements InputProcessor {
         if (keycode == keys.getFocusKey()) knight.wantsHeal = true;
         if (keycode == keys.getUpKey()) knight.wantsLookUp = true;
         if (keycode == keys.getDownKey()) knight.wantsLookDown = true;
+        if (keycode == keys.getCastKey()) knight.wantsCast = true;
         return false;
     }
 
@@ -74,6 +75,9 @@ public class PlayerInputProcessor implements InputProcessor {
         if (button == keys.getFocusKey()) knight.wantsHeal = true;
         if (button == keys.getUpKey()) knight.wantsLookUp = true;
         if (button == keys.getDownKey()) knight.wantsLookDown = true;
+        if (button == keys.getCastKey()) knight.wantsCast = true;
+
+
         return true;
     }
 
@@ -85,8 +89,11 @@ public class PlayerInputProcessor implements InputProcessor {
         if (button == keys.getFocusKey()) knight.wantsHeal = false;
         if (button == keys.getUpKey()) knight.wantsLookUp = false;
         if (button == keys.getDownKey()) knight.wantsLookDown = false;
+        if (button == keys.getCastKey()) knight.wantsCast = false;
+
         return true;
     }
+
     @Override
     public boolean touchCancelled(int x, int y, int p, int b) {
         return false;

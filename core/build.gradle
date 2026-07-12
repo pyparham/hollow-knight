@@ -8,6 +8,7 @@ dependencies {
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
+  implementation 'org.xerial:sqlite-jdbc:3.41.2.2'
 }
 
 jar {

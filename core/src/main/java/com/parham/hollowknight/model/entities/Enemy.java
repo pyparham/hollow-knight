@@ -2,8 +2,9 @@ package com.parham.hollowknight.model.entities;
 
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.parham.hollowknight.controller.AudioManager;
 import com.parham.hollowknight.controller.screens.GameScreen;
-import com.parham.hollowknight.model.Spike;
+import com.parham.hollowknight.model.entities.bossfight.FalseKnight;
 import com.parham.hollowknight.model.enums.AttackDirection;
 import com.parham.hollowknight.model.enums.EnemyState;
 import com.parham.hollowknight.model.enums.EnemyType;
@@ -11,17 +12,21 @@ import com.parham.hollowknight.model.enums.PhysicsConstants;
 
 import java.util.List;
 
+import static com.parham.hollowknight.model.enums.PhysicsConstants.FLASH_DURATION;
+
 public abstract class Enemy {
 
-    GameScreen gameScreen;
+    public GameScreen gameScreen;
     public final Vector2 position = new Vector2();
-    protected float vX = 0f;
-    protected float vY = 0f;
+    public float vX = 0f;
+    public float vY = 0f;
 
     protected final Rectangle bodyHitbox = new Rectangle();
     protected Rectangle attackHitbox = null;
     protected float width;
     protected float height;
+
+    protected float flashTimer = 0f;
 
     protected int maxHealth;
     protected int currentHealth;
@@ -41,8 +46,8 @@ public abstract class Enemy {
     protected float walkSpeed = 80f;
     protected float walkPeriod = 3f;
     protected float restDuration = 1.5f;
-    private float walkTimer = 0f;
-    private float restTimer = 0f;
+    protected float walkTimer = 0f;
+    protected float restTimer = 0f;
 
 
     protected float turnTimer = 0f;
@@ -55,8 +60,7 @@ public abstract class Enemy {
 
     protected static final float HIT_DURATION = 0.35f;
     protected static final float DETECT_RANGE = 600f;
-    protected static final float ATTACK_RANGE = 90f;
-    protected static final float KNOCK_BACK_DURATION = 0.04f;
+    protected static final float KNOCK_BACK_DURATION = 0.05f;
 
 
     protected Enemy(GameScreen gameScreen,
@@ -80,6 +84,8 @@ public abstract class Enemy {
     public final void update(float delta, List<Rectangle> platforms, Vector2 knightPos, List<Spike> spikes) {
         if (!(this instanceof Mossfly && ((Mossfly) this).asleep))
             animTime += delta;
+
+        if (flashTimer > 0f) flashTimer -= delta;
 
 
         if (state == EnemyState.DEAD_GROUND) return;
@@ -230,6 +236,7 @@ public abstract class Enemy {
     }
 
     protected void walk() {
+        if (state != EnemyState.WALKING && this instanceof FalseKnight) return;
         if (facingRight) {
             if (position.x + width >= walkRight) onWalkTurn();
             else vX = walkSpeed;
@@ -263,16 +270,18 @@ public abstract class Enemy {
         }
     }
 
-    public void takeDamage(int damage, boolean hitFromLeft) {
+    public void takeDamage(int damage, boolean hitFromLeft, boolean isVengefulSprit) {
         if (dead || state == EnemyState.HIT) return;
         currentHealth -= damage;
         Knight knight = gameScreen.getKnight();
-        knight.gainSoul(damage);
-
+        if (!isVengefulSprit) knight.gainSoul(damage);
+        AudioManager.getInstance().playSound(gameScreen.getGame().assets.hitSound);
         if (currentHealth <= 0) {
             currentHealth = 0;
             dead = true;
             state = EnemyState.DEAD_AIR;
+            gameScreen.getGame().currentGameData.enemiesKilled++;
+            AudioManager.getInstance().playSound(gameScreen.getGame().assets.enemyDeathSound);
             animTime = 0f;
             vX = 0;
             vY = PhysicsConstants.KNOCKBACK_Y * 2;
@@ -280,6 +289,8 @@ public abstract class Enemy {
         }
         state = EnemyState.HIT;
         hitTimer = HIT_DURATION;
+        flashTimer = FLASH_DURATION;
+
         knockBackTimer = KNOCK_BACK_DURATION;
         animTime = 0f;
         float massRatio = 50f / this.mass;
@@ -314,6 +325,7 @@ public abstract class Enemy {
     }
 
     public int getAttackDamage() {
+        if (state == EnemyState.POWER_SLAM) return attackDamage * 2;
         return attackDamage;
     }
 
@@ -325,5 +337,9 @@ public abstract class Enemy {
         return attackHitbox != null
             ? new Vector2(attackHitbox.x, attackHitbox.y)
             : position;
+    }
+
+    public boolean isFlashing() {
+        return flashTimer > 0f && !(state == EnemyState.DEAD_AIR || state == EnemyState.DEAD_GROUND);
     }
 }

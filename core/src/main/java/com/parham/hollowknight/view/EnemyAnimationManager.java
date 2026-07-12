@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.parham.hollowknight.model.entities.Enemy;
 
 public class EnemyAnimationManager {
@@ -16,6 +17,34 @@ public class EnemyAnimationManager {
     private final Animation<TextureRegion> hitAnim;
     private final Animation<TextureRegion> deadAirAnim;
     private final Animation<TextureRegion> deadGroundAnim;
+
+
+    private ShaderProgram whiteShader;
+    private static final String VERTEX_SHADER =
+        "attribute vec4 a_position;\n" +
+            "attribute vec4 a_color;\n" +
+            "attribute vec2 a_texCoord0;\n" +
+            "uniform mat4 u_projTrans;\n" +
+            "varying vec4 v_color;\n" +
+            "varying vec2 v_texCoords;\n" +
+            "void main() {\n" +
+            "   v_color = a_color;\n" +
+            "   v_texCoords = a_texCoord0;\n" +
+            "   gl_Position = u_projTrans * a_position;\n" +
+            "}\n";
+
+    private static final String FRAGMENT_SHADER =
+        "#ifdef GL_ES\n" +
+            "precision mediump float;\n" +
+            "#endif\n" +
+            "varying vec4 v_color;\n" +
+            "varying vec2 v_texCoords;\n" +
+            "uniform sampler2D u_texture;\n" +
+            "void main() {\n" +
+            "   vec4 texColor = texture2D(u_texture, v_texCoords);\n" +
+            "   vec3 tinted = mix(texColor.rgb, vec3(1.0), 0.5);\n" +
+            "   gl_FragColor = vec4(tinted, texColor.a * v_color.a);\n" +
+            "}\n";
 
 
     public EnemyAnimationManager(
@@ -45,11 +74,16 @@ public class EnemyAnimationManager {
             buildAnim(deadAirSheet, deadAirFrames, deadAirSpeed, Animation.PlayMode.NORMAL) : null;
         this.deadGroundAnim = (deadGroundSheet != null) ?
             buildAnim(deadGroundSheet, deadGroundFrames, deadGroundSpeed, Animation.PlayMode.NORMAL) : null;
+
+        whiteShader = new ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER);
+
     }
 
     public void draw(SpriteBatch batch, Enemy enemy) {
         TextureRegion frame = getCurrentFrame(enemy);
         if (frame == null) return;
+
+        if (enemy.isFlashing()) batch.setShader(whiteShader);
 
         float fw = frame.getRegionWidth();
         float fh = frame.getRegionHeight();
@@ -59,6 +93,8 @@ public class EnemyAnimationManager {
 
         if (!enemy.facingRight) batch.draw(frame, x, y, fw, fh);
         else batch.draw(frame, x + fw, y, -fw, fh);
+
+        if (enemy.isFlashing()) batch.setShader(null);
 
     }
 

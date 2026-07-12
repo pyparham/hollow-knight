@@ -33,6 +33,7 @@ public class GuideScreen extends BaseScreen {
     public Stage getStage() {
         return this.stage;
     }
+
     @Override
     public void show() {
         stage = new Stage(new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT), game.batch);
@@ -40,7 +41,6 @@ public class GuideScreen extends BaseScreen {
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(game.assets.menuFont, Color.GOLD);
         Label.LabelStyle textStyle = new Label.LabelStyle(game.assets.listFont, Color.WHITE);
-        Label.LabelStyle cheatStyle = new Label.LabelStyle(game.assets.listFont, Color.GRAY);
 
         Table root = new Table();
         root.setFillParent(true);
@@ -63,7 +63,7 @@ public class GuideScreen extends BaseScreen {
         controlsTable.add(new Label("Attack: " + formatKey(keys.getAttackKey()), textStyle)).padRight(40).left();
         controlsTable.add(new Label("Focus (Heal): " + formatKey(keys.getFocusKey()), textStyle)).left().row();
 
-        controlsTable.add(new Label("Quick Cast: " + formatKey(keys.getQuickCastKey()), textStyle)).padRight(40).left();
+        controlsTable.add(new Label("Cast: " + formatKey(keys.getCastKey()), textStyle)).padRight(40).left();
         controlsTable.add(new Label("Super Dash: " + formatKey(keys.getSuperDashKey()), textStyle)).left().row();
 
         controlsTable.add(new Label("Dream Nail: " + formatKey(keys.getDreamNailKey()), textStyle)).padRight(40).left();
@@ -76,11 +76,6 @@ public class GuideScreen extends BaseScreen {
         abilitiesTable.add(new Label("- SOUL: Attack enemies to gather Soul.", textStyle)).row();
         abilitiesTable.add(new Label("- FOCUS: Hold '" + formatKey(keys.getFocusKey()) + "' to consume Soul and heal.", textStyle)).row();
         root.add(abilitiesTable).padBottom(25).row();
-
-        Table cheatsTable = new Table();
-        cheatsTable.add(new Label("CHEAT CODES", textStyle)).padBottom(10).row();
-        cheatsTable.add(new Label("IDDQD - God Mode | IDKFA - Full Power", cheatStyle)).row();
-        root.add(cheatsTable).padBottom(30).row();
 
         TextButton.TextButtonStyle btnStyle = new TextButton.TextButtonStyle();
         btnStyle.font = game.assets.menuFont;

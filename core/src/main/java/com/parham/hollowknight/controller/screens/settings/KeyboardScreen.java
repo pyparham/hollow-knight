@@ -136,14 +136,14 @@ public class KeyboardScreen extends BaseScreen {
         addKeyRow(leftCol, "Jump", keys.getJumpKey(), keys::setJumpKey, actionStyle);
         addKeyRow(leftCol, "Attack", keys.getAttackKey(), keys::setAttackKey, actionStyle);
         addKeyRow(leftCol, "Dash", keys.getDashKey(), keys::setDashKey, actionStyle);
-        addKeyRow(leftCol, "Focus / Cast", keys.getFocusKey(), keys::setFocusKey, actionStyle);
+        addKeyRow(leftCol, "Focus", keys.getFocusKey(), keys::setFocusKey, actionStyle);
 
         addKeyRow(rightCol, "Left", keys.getLeftKey(), keys::setLeftKey, actionStyle);
         addKeyRow(rightCol, "Right", keys.getRightKey(), keys::setRightKey, actionStyle);
         addKeyRow(rightCol, "Quick Map", keys.getQuickMapKey(), keys::setQuickMapKey, actionStyle);
         addKeyRow(rightCol, "Super Dash", keys.getSuperDashKey(), keys::setSuperDashKey, actionStyle);
         addKeyRow(rightCol, "Dream Nail", keys.getDreamNailKey(), keys::setDreamNailKey, actionStyle);
-        addKeyRow(rightCol, "Quick Cast", keys.getQuickCastKey(), keys::setQuickCastKey, actionStyle);
+        addKeyRow(rightCol, "Cast", keys.getCastKey(), keys::setCastKey, actionStyle);
 
         root.add(leftCol).top().padRight(150);
         root.add(rightCol).top().row();
@@ -177,7 +177,6 @@ public class KeyboardScreen extends BaseScreen {
         backBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent e, float x, float y) {
-                saveKeyBindings();
                 game.popScreen();
             }
 
@@ -198,15 +197,9 @@ public class KeyboardScreen extends BaseScreen {
         navActions = new Runnable[]{
             this::resetDefaults,
             () -> {
-                saveKeyBindings();
                 game.setScreen(new SettingsScreen(game));
             }
         };
-    }
-
-    private void saveKeyBindings() {
-        if (game.currentGameData == null) return;
-        // implement in json
     }
 
 
@@ -292,7 +285,6 @@ public class KeyboardScreen extends BaseScreen {
             navActions[selectedIndex].run();
         if (Gdx.input.isKeyJustPressed(Input.Keys.BACKSPACE) ||
             Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            saveKeyBindings();
             game.popScreen();
         }
     }
@@ -338,7 +330,7 @@ public class KeyboardScreen extends BaseScreen {
                 keys.setDreamNailKey(keyCode);
                 break;
             case "Quick Cast":
-                keys.setQuickCastKey(keyCode);
+                keys.setCastKey(keyCode);
                 break;
             case "Inventory":
                 keys.setInventoryKey(keyCode);
@@ -384,7 +376,7 @@ public class KeyboardScreen extends BaseScreen {
                 code = keys.getDreamNailKey();
                 break;
             case "Quick Cast":
-                code = keys.getQuickCastKey();
+                code = keys.getCastKey();
                 break;
             case "Inventory":
                 code = keys.getInventoryKey();

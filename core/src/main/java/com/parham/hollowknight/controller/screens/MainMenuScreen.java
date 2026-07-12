@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -13,7 +12,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.parham.hollowknight.Constants;
 import com.parham.hollowknight.Main;
 import com.parham.hollowknight.controller.screens.settings.SettingsScreen;
 import com.parham.hollowknight.view.BackGroundDust;
@@ -25,7 +23,6 @@ import static com.parham.hollowknight.Constants.SCREEN_WIDTH;
 public class MainMenuScreen extends BaseScreen {
     private Stage stage;
     private final Main game;
-    private Texture backgroundTexture;
     private Viewport viewport;
     private int selectedIndex = 0;
     private float alpha = 0f;
@@ -45,8 +42,6 @@ public class MainMenuScreen extends BaseScreen {
 
     @Override
     public void show() {
-        backgroundTexture = new Texture(Gdx.files.internal(Constants.MENU_BG));
-        backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
         viewport = new FitViewport(SCREEN_WIDTH, SCREEN_HEIGHT);
         stage = new Stage(viewport, game.batch);
         Gdx.input.setInputProcessor(stage);
@@ -103,7 +98,6 @@ public class MainMenuScreen extends BaseScreen {
 
     @Override
     public void dispose() {
-        backgroundTexture.dispose();
         if (stage != null) stage.dispose();
     }
 
@@ -117,7 +111,8 @@ public class MainMenuScreen extends BaseScreen {
         menuActions = new Runnable[]{
             () -> game.pushScreen(new StartGameScreen(game)),
             () -> game.pushScreen(new SettingsScreen(game)),
-            () -> {  },
+            () -> {
+            },
             () -> game.pushScreen(new GuideScreen(game)),
             () -> Gdx.app.exit()
         };

@@ -70,8 +70,8 @@ public class BreakableWall {
     }
 
     public static Animation<TextureRegion> buildAnim(Texture sheet, int frameCount,
-                                               float frameDuration,
-                                               Animation.PlayMode mode) {
+                                                     float frameDuration,
+                                                     Animation.PlayMode mode) {
         TextureRegion[] frames = new TextureRegion[frameCount];
         int frameW = sheet.getWidth() / frameCount;
         int frameH = sheet.getHeight();

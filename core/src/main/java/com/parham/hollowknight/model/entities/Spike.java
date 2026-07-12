@@ -1,4 +1,4 @@
-package com.parham.hollowknight.model;
+package com.parham.hollowknight.model.entities;
 
 
 import com.badlogic.gdx.math.Rectangle;

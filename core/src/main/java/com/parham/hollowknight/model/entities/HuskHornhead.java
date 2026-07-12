@@ -16,7 +16,7 @@ public class HuskHornhead extends Enemy {
     private static final float WALK_SPEED = 70f;
     private static final float CHARGE_SPEED = 320f;
     private static final float ANTICIPATE_DURATION = 0.3f;
-    private static final float CHARGE_DURATION = 2.0f;
+    private static final float CHARGE_DURATION = 1.0f;
     private static final float CHARGE_COOLDOWN = 0.7f;
     private float chargeTimer = 0f;
 
@@ -47,7 +47,7 @@ public class HuskHornhead extends Enemy {
                     chargeTimer = CHARGE_DURATION;
                 }
             } else if (state == EnemyState.ATTACK) {
-                vX = facingRight ? CHARGE_SPEED : -CHARGE_SPEED;
+                chasePlayer(knightPos, CHARGE_SPEED);
                 if (chargeTimer <= 0f) {
                     charging = false;
                     chargeCooldown = CHARGE_COOLDOWN;
@@ -58,7 +58,7 @@ public class HuskHornhead extends Enemy {
             return;
         }
 
-        if (playerInSight(knightPos,platforms) && chargeCooldown <= 0f) {
+        if (playerInSight(knightPos, platforms) && chargeCooldown <= 0f) {
             charging = true;
             facePlayer(knightPos);
             state = EnemyState.ATTACK_JUMP;
@@ -100,8 +100,8 @@ public class HuskHornhead extends Enemy {
     }
 
     @Override
-    public void takeDamage(int damage, boolean hitFromLeft) {
-        super.takeDamage(damage, hitFromLeft);
+    public void takeDamage(int damage, boolean hitFromLeft, boolean isSpell) {
+        super.takeDamage(damage, hitFromLeft, isSpell);
 
         this.facingRight = !hitFromLeft;
 

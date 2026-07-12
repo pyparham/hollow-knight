@@ -7,16 +7,22 @@ public class Constants {
     public static final int SCREEN_HEIGHT = 1080;
 
     //for intro
-    public static final float INTRO_DURATION = 1f;
+    public static final float INTRO_DURATION = 4f;
     public static final float INTRO_FADE_TIME = 1f;
-    public static final float MIN_DISPLAY_TIME = 0f;
+    public static final float MIN_DISPLAY_TIME = 5f;
 
 
     //assets path
     public static final String INTRO_LOGO = "images/intro/intro.png";
     public static final String MENU_BG = "images/menus/mainMenu/Voidheart_menu_BG.png";
+    public static final String MENU_BG2 = "images/menus/mainMenu/controller_prompt_bg 2026.png";
+    public final static String MENU_BG3 = "images/menus/mainMenu/vheart_save_Switch.png";
+    public static final String MENU_BG4 = "images/menus/mainMenu/infected_menu_pieces_0001_Layer-0.png";
     public static final String LOADING_BG = "images/intro/controller_prompt_bg.png";
     public static final String MENU_POINTER = "images/menus/menuPointer.png";
+
+    public static final String PREV_CROSS = "images/menus/Area_Forgotten Crossroads.png";
+    public static final String PREV_GREEN = "images/menus/Area_Green_Path.png";
 
 
     //audio
@@ -27,19 +33,47 @@ public class Constants {
     // knight sound effect
     public static final String KNIGHT_DASH = "audio/effects/knight/hero_dash.wav";
     public static final String KNIGHT_JUMP = "audio/effects/knight/hero_jump.wav";
-    public static final String KNIGHT_LANDING = "audio/effects/knight/hero_land_soft.wav";
-    public static final String KNIGHT_WALK = "audio/effects/knight/hero_walk_footsteps_stone.wav";
-    public static final String KNIGHT_ATTACK = "audio/effects/knight/sword_1.wav";
-    public static final String KNIGHT_WALL_JUMP = "audio/effects/knight/hero_wall_jump.wav";
+    public static final String KNIGHT_SLASH = "audio/effects/knight/sword_1.wav";
+    public static final String KNIGHT_HIT = "audio/effects/knight/hero_damage.wav";
+    public static final String KNIGHT_DEATH = "audio/effects/knight/hero_death_v2.wav";
+    public static final String KNIGHT_FOCUS_START = "audio/effects/knight/focus_health_heal.wav";
+    public static final String KNIGHT_FOCUS = "audio/effects/knight/focus_health_charging.wav";
+    public static final String KNIGHT_FOCUS_END = "audio/effects/knight/focus_ready.wav";
+    public static final String SOUL_ORB_FULL = "audio/effects/knight/soul_pickup_1.wav";
+    public static final String KNIGHT_LAND = "audio/effects/knight/hero_land_soft.wav";
+    public static final String KNIGHT_WALK_SOUND = "audio/effects/knight/hero_walk_footsteps_stone.wav";
+
+    public static final String KNIGHT_POGO = "audio/effects/knight/sword_hit_reject.wav";
 
 
     // enemy sound effect
+    public static final String ENEMY_DEATH = "audio/effects/enemy/enemy_death_sword.wav";
+    public static final String ENEMY_HIT = "audio/effects/enemy/enemy_damage.wav";
 
+    // flase knight sound effect
+    public static final String FALSE_KNIGHT_HIT = "audio/effects/enemy/falseKnight/false_knight_swing.wav";
+    public static final String FALSE_KNIGHT_DEATH = "audio/effects/enemy/falseKnight/FKnight_death.wav";
+    public static final String STUN_HIT = "audio/effects/enemy/falseKnight/Fknight_hit_01.wav";
+    public static final String ATTACK_ANTICIPATE = "audio/effects/enemy/falseKnight/False_Knight_Attack_New_02.wav";
+    public static final String ATTACK_LUNGE = "audio/effects/enemy/falseKnight/false_knight_damage_armour.wav";
+    public static final String FALSE_KNIGHT_JUMP = "audio/effects/enemy/falseKnight/false_knight_jump.wav";
+    public static final String FALSE_KNIGHT_POWER_MACE = "audio/effects/enemy/falseKnight/false_knight_strike_ground.wav";
+    public static final String FALSE_KNIGHT_LAND = "audio/effects/enemy/falseKnight/false_knight_land.wav";
+    public static final String FK_ROLL = "audio/effects/enemy/falseKnight/false_knight_roll.wav";
+
+    //zote sound effect
+    public static final String ZOTE1 = "audio/effects/Zote_01.wav";
+    public static final String ZOTE2 = "audio/effects/Zote_02.wav";
+    public static final String ZOTE3 = "audio/effects/Zote_03.wav";
+    public static final String ZOTE4 = "audio/effects/Zote_04.wav";
+    public static final String ZOTE5 = "audio/effects/dr-stop-1.mp3";
+    public static final String ZOTE6 = "audio/effects/dr-stop-5.mp3";
 
     // music
     public static final String MENU_MUSIC = "audio/music/menu.mp3";
-    public static final String CROSS_ROADS = "audio/music/cross.mp3";
+    public static final String CROSS_ROADS = "audio/music/cross.wav";
     public static final String GREEN_PATH = "audio/music/green.mp3";
+    public static final String BOSS_FIGHT = "audio/music/bossfight.wav";
 
     //loading bar
     public static final float LOADING_BAR_WIDTH = 400f;
@@ -85,13 +119,16 @@ public class Constants {
 
     public static final String DASH = "maps/knight/move/Dash.png";
     public static final String DEATH = "maps/knight/move/Death.png";
-    public static final String STANDUP = "maps/knight/move/StandUp.png";
 
     public static final String WALL_SLIDE = "maps/knight/move/WallSlide.png";
     public static final String WALL_JUMP = "maps/knight/move/Walljump.png";
 
     public static final String ATTACK = "maps/knight/move/SlashAlt.png";
     public static final String HIT = "maps/knight/move/Scream.png";
+
+    public static final String SOUL_BALL = "maps/knight/SoulBall.png";
+    public static final String BLAST = "maps/knight/Blast.png";
+
 
     // maps
     public static final String CROSS_ROADS_MAP = "maps/crossroad.tmx";
@@ -100,6 +137,7 @@ public class Constants {
     public static final String GREEN_PATH_MAP = "maps/greenpath/greenpath.tmx";
     public static final String BREAK_WALL = "maps/crossparts/wall/breakablePath_001.png";
     public static final String SHAKE_WALL = "maps/crossparts/wall/brakeshake.png";
+    public static final String BOSS_DOOR = "maps/crossparts/floor/break0000.png";
 
 
     // soul
@@ -157,6 +195,9 @@ public class Constants {
     public static final String FALSENIGHT_LAND = "animations/falsenight/Land.png";
     public static final String FALSENIGHT_RUN = "animations/falsenight/Run.png";
     public static final String FALSENIGHT_STUN_RECOVER = "animations/falsenight/StunRecover.png";
+    public static final String FALSENIGHT_RUN_ANTIC = "animations/falsenight/RunAntic.png";
+    public static final String SHOCK_WAVE = "animations/falsenight/Shockwave.png";
+
 
     public static final String ZOTE_ATTACK = "animations/zote/Attack.png";
     public static final String ZOTE_FALL = "animations/zote/Fall.png";

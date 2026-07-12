@@ -1,6 +1,5 @@
 package com.parham.hollowknight.controller;
 
-import com.badlogic.gdx.math.Vector2;
 import com.parham.hollowknight.Main;
 import com.parham.hollowknight.controller.screens.GameScreen;
 import com.parham.hollowknight.model.entities.Knight;
@@ -56,13 +55,14 @@ public class DeathController {
         if (phase == Phase.FADING_OUT) {
             alpha = Math.min(1f, alpha + FADE_SPEED * delta);
             game.globalDarkness = alpha;
-            knight.currentState = KnightState.HIT;
             if (alpha >= 1f) {
                 if (isSpikeRespawn) knight.position.set(knight.lastSafePosition);
-                else gameScreen.respawnAtCheckpoint();
+                else {
+                    knight.currentState = KnightState.DEAD;
+                    gameScreen.respawnAtCheckpoint();
+                }
                 phase = Phase.FADING_IN;
-            }
-
+            } else knight.currentState = KnightState.HIT;
         } else if (phase == Phase.FADING_IN) {
             alpha = Math.max(lastGlobalDarkness, alpha - FADE_SPEED * delta);
             game.globalDarkness = alpha;
@@ -70,7 +70,7 @@ public class DeathController {
             if (alpha <= lastGlobalDarkness) {
                 phase = Phase.NONE;
                 game.globalDarkness = lastGlobalDarkness;
-                deathToIdleTimer = 0.5f;
+                deathToIdleTimer = 0.2f;
             }
         }
     }

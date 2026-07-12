@@ -36,7 +36,8 @@ public class AudioScreen extends BaseScreen {
     private int selectedIndex = 0;
     private MenuPointerManager pointerManager;
     BackGroundDust menuDust = new BackGroundDust();
-
+    private boolean isAudioOn;
+    private TextButton muteBtn;
 
     private Slider masterSlider, soundSlider, musicSlider;
 
@@ -45,6 +46,7 @@ public class AudioScreen extends BaseScreen {
         masterVolume = AudioManager.getInstance().getMasterVolume() * 10;
         soundVolume = AudioManager.getInstance().getSoundVolume() * 10;
         musicVolume = AudioManager.getInstance().getMusicVolume() * 10;
+        isAudioOn = !AudioManager.getInstance().isMuted();
     }
 
     public Stage getStage() {
@@ -141,11 +143,27 @@ public class AudioScreen extends BaseScreen {
         });
 
         root.add(buildRow("Master Volume:", masterSlider, masterVal, rowStyle)).padBottom(30).row();
-        root.add(buildRow("Sound Volume:", soundSlider, soundVal, rowStyle)).padBottom(30).row();
+        root.add(buildRow("SFX Volume:", soundSlider, soundVal, rowStyle)).padBottom(30).row();
         root.add(buildRow("Music Volume:", musicSlider, musicVal, rowStyle)).padBottom(90).row();
 
+        muteBtn = new TextButton(isAudioOn ? "Audio: ON" : "Audio: OFF", btnStyle);
         resetBtn = new TextButton("Reset Defaults", btnStyle);
         backBtn = new TextButton("Back", btnStyle);
+
+        muteBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent e, float x, float y) {
+                toggleAudio();
+            }
+
+            @Override
+            public void enter(InputEvent e, float x, float y, int pointer, Actor from) {
+                if (selectedIndex == 0) return;
+                selectedIndex = 0;
+                highlightSelected();
+            }
+        });
+
 
         resetBtn.addListener(new ClickListener() {
             @Override
@@ -155,8 +173,8 @@ public class AudioScreen extends BaseScreen {
 
             @Override
             public void enter(InputEvent e, float x, float y, int pointer, Actor from) {
-                if (selectedIndex == 0) return;
-                selectedIndex = 0;
+                if (selectedIndex == 1) return;
+                selectedIndex = 1;
                 highlightSelected();
             }
         });
@@ -169,17 +187,20 @@ public class AudioScreen extends BaseScreen {
 
             @Override
             public void enter(InputEvent e, float x, float y, int pointer, Actor from) {
-                if (selectedIndex == 1) return;
-                selectedIndex = 1;
+                if (selectedIndex == 2) return;
+                selectedIndex = 2;
                 highlightSelected();
             }
         });
 
+
+        root.add(muteBtn).padBottom(22).row();
         root.add(resetBtn).padBottom(22).row();
         root.add(backBtn).row();
 
-        navButtons = new TextButton[]{resetBtn, backBtn};
+        navButtons = new TextButton[]{muteBtn, resetBtn, backBtn};
         navActions = new Runnable[]{
+            this::toggleAudio,
             this::resetDefaults,
             () -> game.setScreen(new SettingsScreen(game))
         };
@@ -193,9 +214,16 @@ public class AudioScreen extends BaseScreen {
         return row;
     }
 
+    private void toggleAudio() {
+        isAudioOn = !isAudioOn;
+        muteBtn.setText(isAudioOn ? "Audio: ON" : "Audio: OFF");
+        AudioManager.getInstance().setMuted(!isAudioOn);
+    }
+
     private void applyVolumes() {
         if (game.audioManager != null)
             game.audioManager.updateMusicVolume(masterVolume, musicVolume, soundVolume);
+
     }
 
     private void resetDefaults() {

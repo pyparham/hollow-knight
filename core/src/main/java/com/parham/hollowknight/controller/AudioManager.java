@@ -16,6 +16,7 @@ public class AudioManager {
     private static boolean isFading = false;
     private static float lastMusicVolume = 1.0f;
     private Sound soundToPlay;
+    private static boolean isMuted = false;
 
 
     private AudioManager() {
@@ -48,16 +49,17 @@ public class AudioManager {
     }
 
     public void playClickSound() {
-        clickSound.play(masterVolume * soundVolume);
+        if (!isMuted) clickSound.play(masterVolume * soundVolume);
     }
-
 
     public void updateMusicVolume(float master, float music, float sound) {
         masterVolume = master / 10f;
         musicVolume = music / 10f;
         soundVolume = sound / 10f;
         lastMusicVolume = musicVolume;
-        currentMusic.setVolume(masterVolume * musicVolume);
+        if (currentMusic != null)
+            currentMusic.setVolume(isMuted ? 0f : masterVolume * musicVolume);
+
     }
 
     public void dispose() {
@@ -122,6 +124,28 @@ public class AudioManager {
     }
 
     public void playSound(Sound sound) {
-        sound.play(soundVolume * masterVolume);
+        if (!isMuted) sound.play(soundVolume * masterVolume);
     }
+
+
+
+    public void stopSound(Sound sound) {
+        if (sound != null) sound.stop();
+    }
+
+    public Sound getCurrentSound() {
+        return soundToPlay;
+    }
+
+    public boolean isMuted() {
+        return isMuted;
+    }
+
+    public void setMuted(boolean muted) {
+        isMuted = muted;
+        if (currentMusic != null) {
+            currentMusic.setVolume(isMuted ? 0f : masterVolume * musicVolume);
+        }
+    }
+
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.parham.hollowknight.model.entities.Knight;
 import com.parham.hollowknight.model.enums.KnightState;
 
@@ -55,14 +56,36 @@ public class KnightAnimationManager {
     private boolean dashEffectVisible = false;
     private float dashEffectTime = 0f;
 
-    private boolean blinkVisible = true;
-    private float blinkTimer = 0f;
-    private boolean isBlinking = false;
-
-    private static final float BLINK_ON_TIME = 0.1f;
-    private static final float BLINK_OFF_TIME = 0.08f;
     private static final float DRAW_WIDTH = 349f;
     private static final float DRAW_HEIGHT = 186f;
+
+    private ShaderProgram blackShader;
+
+    private static final String VERTEX_SHADER =
+        "attribute vec4 a_position;\n" +
+            "attribute vec4 a_color;\n" +
+            "attribute vec2 a_texCoord0;\n" +
+            "uniform mat4 u_projTrans;\n" +
+            "varying vec4 v_color;\n" +
+            "varying vec2 v_texCoords;\n" +
+            "void main() {\n" +
+            "   v_color = a_color;\n" +
+            "   v_texCoords = a_texCoord0;\n" +
+            "   gl_Position = u_projTrans * a_position;\n" +
+            "}\n";
+
+    private static final String FRAGMENT_SHADER =
+        "#ifdef GL_ES\n" +
+            "precision mediump float;\n" +
+            "#endif\n" +
+            "varying vec4 v_color;\n" +
+            "varying vec2 v_texCoords;\n" +
+            "uniform sampler2D u_texture;\n" +
+            "void main() {\n" +
+            "   vec4 texColor = texture2D(u_texture, v_texCoords);\n" +
+            "   vec3 tinted = mix(texColor.rgb, vec3(0.0), 0.7);\n" +
+            "   gl_FragColor = vec4(tinted, texColor.a * v_color.a);\n" +
+            "}\n";
 
 
     public KnightAnimationManager(
@@ -122,7 +145,9 @@ public class KnightAnimationManager {
 
         dashEffectAnim = buildAnim(dashEffectSheet, dashEffectFrames, 0.04f, Animation.PlayMode.NORMAL);
         wallSlideAnim = buildAnim(wallSlideSheet, wallSlideFrames, 0.1f, Animation.PlayMode.LOOP);
-        wallJumpAnim = buildAnim(wallJumpSheet, wallJumpFrames, 0.08f, Animation.PlayMode.NORMAL);
+        wallJumpAnim = buildAnim(wallJumpSheet, wallJumpFrames, 0.03f, Animation.PlayMode.NORMAL);
+
+        blackShader = new ShaderProgram(VERTEX_SHADER, FRAGMENT_SHADER);
 
     }
 
@@ -189,9 +214,12 @@ public class KnightAnimationManager {
         float x = knight.position.x - (DRAW_WIDTH - Knight.WIDTH) / 2f;
         float y = knight.position.y - (DRAW_HEIGHT - Knight.HEIGHT) / 2f + 30;
 
+        if (knight.isBlinking()) batch.setShader(blackShader);
+
         if (!knight.facingRight) batch.draw(frame, x, y, DRAW_WIDTH, DRAW_HEIGHT);
         else batch.draw(frame, x + DRAW_WIDTH, y, -DRAW_WIDTH, DRAW_HEIGHT);
 
+        if (knight.isBlinking()) batch.setShader(null);
 
         if (slashVisible && knight.currentState == KnightState.ATTACKING) drawSlash(batch, knight);
 
